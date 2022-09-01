@@ -6,22 +6,34 @@ Small application that queries GitHub's API and returns 500 repos with the topic
 
 How to run the app on your local:
 
+### Using Docker (recommended)
+
+Before you run this app using docker, you must have docker on your local. [see this](https://www.docker.com/get-started) for installing docker on your local machine
+
+After you installing docker on your local, follow these commands below:
+
 1. build and run using docker-compose
 
     ```
     docker-compose up -d --build
     ```
 
-1. set up your GITHUB_TOKEN on env
-    ```
-    GITHUB_TOKEN=
-    ```
-1. copy and configure config file
-    ```
-    docker-compose exec app cp .env.example .env
-    ```
 1. install dependencies
     ```
     docker-compose exec app composer install
     ```
-1. API Documentation should be accessible via [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)
+
+### Using Local Development Server
+
+1. install dependencies
+    ```
+    composer install
+    ```
+1. run local development server
+    ```
+    php artisan serve
+    ```
+
+## API Documentation
+
+API Documentation should be accessible via [http://localhost:8000/api/documentation](http://localhost:8000/api/documentation)

@@ -6,6 +6,8 @@ use App\Helpers\CollectionHelper;
 use App\Helpers\GithubApi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
+use GrahamCampbell\GitHub\Facades\GitHub;
+use Github\ResultPager;
 
 class GithubRepository implements GithubRepositoryInterface
 {
@@ -14,17 +16,19 @@ class GithubRepository implements GithubRepositoryInterface
     private function searchRepositories()
     {
         return Cache::remember(__CLASS__ . '/' . __FUNCTION__, $this->cacheTtl, function () {
-            $repos = [];
-            for ($i = 1; $i <= 5; $i++) {
-                $response = GithubApi::search([
-                    'q' => 'php',
-                    'per_page' => 100,
-                    'page' => $i,
-                ]);
+            $searchApi = GitHub::search();
+            $paginator = new ResultPager(GitHub::connection(), 100);
 
-                $repos = array_merge($repos, $response['items']);
+            $params = ['topic:php', null, null];
+            $response = $paginator->fetch($searchApi, 'repositories', $params);
+            $repos = collect($response['items']);
+
+            while ($repos->count() < 500) {
+                $response = $paginator->fetchNext();
+                $repos = $repos->merge($response['items']);
             }
-            return collect($repos);
+
+            return $repos;
         });
     }
 
