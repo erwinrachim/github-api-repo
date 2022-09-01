@@ -1,0 +1,53 @@
+version: "3.5"
+
+volumes:
+  db_data:
+  dbadmin_data:
+
+services:
+  web:
+    image: nginx:alpine
+    container_name: spacesage_web
+    depends_on:
+      - app
+      - dbadmin
+    ports:
+      - "8000:80"
+    volumes:
+      - ./config/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www/html
+      - dbadmin_data:/var/www/phpmyadmin
+  app:
+    build: .
+    container_name: spacesage_app
+    depends_on:
+      - database
+    environment:
+      DB_HOST: database
+      DB_DATABASE: spacesage
+      DB_USERNAME: spacesage
+      DB_PASSWORD: secret
+    volumes:
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+      - .:/var/www/html
+  database:
+    image: mysql:5.7
+    container_name: spacesage_db
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: spacesage
+      MYSQL_USER: spacesage
+      MYSQL_PASSWORD: secret
+    volumes:
+      - db_data:/var/lib/mysql
+  dbadmin:
+    image: phpmyadmin/phpmyadmin:fpm-alpine
+    container_name: spacesage_dbadmin
+    depends_on:
+      - database
+    environment:
+      PMA_HOST: database
+      PMA_USER: root
+      PMA_PASSWORD: secret
+    volumes:
+      - dbadmin_data:/var/www/html
